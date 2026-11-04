@@ -1,0 +1,24 @@
+diff --git a/iqoptionapi/api.py b/iqoptionapi/api.py
+index 7b8f923..03308c0 100644
+--- a/iqoptionapi/api.py
++++ b/iqoptionapi/api.py
+@@ -165,7 +165,7 @@ class IQOptionAPI(object):  # pylint: disable=too-many-instance-attributes
+         self.wss_url = "wss://{host}/echo/websocket".format(host=host)
+         self.websocket_client = None
+         self.session = requests.Session()
+-        self.session.verify = False
++        self.session.verify = True  # แก้ความปลอดภัย: เดิม False (ไม่ตรวจใบรับรอง HTTPS)
+         self.session.trust_env = False
+         self.username = username
+         self.password = password
+@@ -778,8 +778,9 @@ class IQOptionAPI(object):  # pylint: disable=too-many-instance-attributes
+ 
+         self.websocket_client = WebsocketClient(self)
+ 
++        import certifi  # แก้ความปลอดภัย: เดิมปิดการตรวจใบรับรอง (CERT_NONE)
+         self.websocket_thread = threading.Thread(target=self.websocket.run_forever, kwargs={'sslopt': {
+-                                                 "check_hostname": False, "cert_reqs": ssl.CERT_NONE, "ca_certs": "cacert.pem"}})  # for fix pyinstall error: cafile, capath and cadata cannot be all omitted
++                                                 "check_hostname": True, "cert_reqs": ssl.CERT_REQUIRED, "ca_certs": certifi.where()}})
+         self.websocket_thread.daemon = True
+         self.websocket_thread.start()
+         while True:

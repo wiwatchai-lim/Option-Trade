@@ -1,0 +1,15 @@
+# รหัสผ่าน / คุกกี้ — ห้ามขึ้น git เด็ดขาด
+iq/iq_login.txt
+cookies.txt
+*.env
+
+# สภาพแวดล้อม Python และไลบรารีภายนอก (สร้างใหม่ได้ ดู README)
+iqenv/
+vendor/
+__pycache__/
+
+# ข้อมูลกราฟจาก MT5 (~140MB, ดึงใหม่ได้ด้วย fetch_data.py)
+backtest/data/
+
+# ไฟล์ชั่วคราวของ Word
+~$*
