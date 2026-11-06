@@ -16,6 +16,7 @@
 | `backtest/backtest.py` | กฎ 6 เทคนิค + ทดสอบหลายการตีความ |
 | `backtest/check_size.py`, `daily.py`, `filter_search.py`, `pick3.py`, `find_100.py`, `regimes.py`, `check_top3.py`, `search100.py` | การวิเคราะห์แต่ละรอบ |
 | `backtest/live_alert.py`, `เปิดแจ้งเตือน.bat` | แจ้งเตือนสัญญาณเรียลไทม์จาก MT5 + จดผลลง `live_log.csv` |
+| `backtest/dashboard.py`, `dashboard.html`, `เปิดหน้าเว็บสัญญาณ.bat` | หน้าเว็บดูสัญญาณเรียลไทม์ http://127.0.0.1:8765 — กราฟแท่ง 5 นาที, ป๊อปอัปสัญญาณ, สถิติ/กำไรจำลอง, ตั้งค่าเทคนิค · `เปิดหน้าเว็บสัญญาณ (มือถือ).bat` (หรือ `--lan`) ให้มือถือใน Wi-Fi เดียวกันเข้าดูได้ |
 | `iq/iq_test.py` | ทดสอบดึงแท่งเทียนจาก IQ Option (บัญชี Demo) |
 
 ## ติดตั้งใหม่

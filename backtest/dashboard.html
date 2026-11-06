@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สัญญาณ M5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --shell: #2b3239; --side: #2f373f; --bg: #262d34; --card: #1f252b; --card2: #252c33; --line: #343d46;
+    --text: #e9edf1; --muted: #8b96a1; --dim: #5d6872;
+    --teal: #7ff0d4; --pink: #ec3b63; --lav: #c9c4f2; --lav2: #9d97d6; --white: #ffffff; --ink: #2a3037;
+    --warn: #f3b562; --r: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #1b2025; color: var(--text);
+    font: 14px/1.5 "Poppins", "Prompt", "Leelawadee UI", sans-serif; }
+  button, input, select { font: inherit; color: inherit; }
+  .shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; background: var(--shell); }
+
+  /* ---------- แถบข้าง ---------- */
+  aside { background: var(--side); display: flex; flex-direction: column; padding: 26px 18px 22px; position: sticky; top: 0; height: 100vh; z-index: 3; }
+  .logo { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 34px; }
+  .logo svg { width: 46px; height: 40px; }
+  .logo b { letter-spacing: 3px; font-weight: 600; font-size: 14px; }
+  .nav { display: grid; gap: 6px; }
+  .nav button { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border: 0; background: none; border-radius: 10px;
+    color: #c4ccd4; cursor: pointer; text-align: left; font-size: 14px; }
+  .nav button svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; flex: none; }
+  .nav button:hover { background: #ffffff0d; }
+  .nav button.on { background: var(--white); color: var(--ink); font-weight: 500; }
+  .nav .cnt { margin-left: auto; background: var(--pink); color: #fff; font-size: 11px; min-width: 19px; height: 19px;
+    border-radius: 10px; display: none; place-items: center; padding: 0 5px; }
+  .me { margin-top: auto; text-align: center; }
+  .avatar { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 10px; display: grid; place-items: center;
+    background: conic-gradient(var(--teal), var(--lav), var(--pink), var(--teal)); padding: 3px; }
+  .avatar div { width: 100%; height: 100%; border-radius: 50%; background: var(--card); display: grid; place-items: center; font-size: 22px; }
+  .me b { display: block; font-weight: 500; font-size: 13.5px; }
+  .me small { color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); display: inline-block; }
+  .dot.ok { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+  .dot.bad { background: var(--pink); }
+
+  /* ---------- ส่วนหลัก ---------- */
+  main { background: var(--bg); padding: 22px 28px 32px; min-width: 0; }
+  .topbar { display: flex; align-items: center; gap: 22px; margin-bottom: 22px; }
+  .topbar h1 { font-size: 19px; font-weight: 500; margin: 0 0 0 4px; min-width: 120px; }
+  .search { display: flex; align-items: center; gap: 8px; background: var(--card2); border-radius: 10px; padding: 8px 14px; width: 300px; max-width: 30vw; }
+  .search svg { width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 2; }
+  .search input { background: none; border: 0; outline: none; width: 100%; font-size: 13px; }
+  .search input::placeholder { color: var(--dim); }
+  .next { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 10px; background: var(--card2); font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .next b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 36px; }
+  .next.soon b { color: var(--warn); }
+  .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .ico { width: 34px; height: 34px; border: 0; border-radius: 9px; background: none; cursor: pointer; display: grid; place-items: center; color: var(--muted); }
+  .ico svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .ico.on { color: var(--teal); }
+  .switch { width: 42px; height: 22px; border-radius: 12px; background: #4a545e; border: 0; position: relative; cursor: pointer; padding: 0; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: .2s; }
+  .switch.on { background: var(--teal); }
+  .switch.on::after { left: 23px; background: var(--ink); }
+  .swlbl { font-size: 12px; color: var(--muted); margin-right: -8px; }
+
+  .alert { background: #f3b5621a; border: 1px solid #f3b56238; color: #f4d3a5; border-radius: 10px; padding: 9px 14px; font-size: 12.5px; margin-bottom: 18px; }
+  .error { background: #ec3b631f; border: 1px solid #ec3b6355; color: #ffb7c6; border-radius: 10px; padding: 9px 14px; font-size: 13px; margin-bottom: 18px; display: none; }
+
+  .card { background: var(--card); border-radius: var(--r); padding: 18px 20px; position: relative; min-width: 0; }
+  .card h3 { margin: 0 0 14px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .card h3 .sub { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 400; }
+  .card.white { background: var(--white); color: var(--ink); }
+  .card.white h3 { justify-content: center; }
+  .view { display: none; } .view.on { display: block; }
+
+  /* ---------- KPI ---------- */
+  .kpis { display: grid; gap: 20px; grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; }
+  .kpi { display: flex; align-items: center; gap: 14px; padding: 14px 18px; }
+  .kpi .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+  .kpi .ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .kpi b { display: block; font-size: 21px; font-weight: 500; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .kpi > div > span { color: var(--muted); font-size: 12px; }
+
+  /* ---------- ภาพรวม ---------- */
+  .grid { display: grid; gap: 20px; grid-template-columns: 330px minmax(0, 1fr) minmax(0, 1fr); }
+  .span2 { grid-column: span 2; } .span3 { grid-column: 1 / -1; }
+  @media (max-width: 1250px) { .grid { grid-template-columns: 330px minmax(0, 1fr); } .tl { grid-column: span 2; } }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: sticky; height: auto; flex-direction: row; align-items: center; padding: 10px 14px; gap: 10px; overflow-x: auto; }
+    .logo { margin: 0; } .logo b { display: none; } .nav { display: flex; } .me { display: none; }
+    .nav button span.t { display: none; }
+    main { padding: 14px; } .grid, .sgrid2 { grid-template-columns: 1fr !important; } .span2, .tl, .span3 { grid-column: auto !important; }
+    .search, #now, .swlbl { display: none; } .topbar { gap: 10px; } .topbar h1 { min-width: 0; }
+    .kpis { grid-template-columns: 1fr 1fr; gap: 12px; }
+    td, th { padding: 8px 6px !important; } .hide-m { display: none; }
+  }
+
+  .info { display: grid; grid-template-columns: 110px 1fr; row-gap: 13px; font-size: 13.5px; margin: 6px 4px 0; }
+  .info span { color: #9aa1a9; }
+  .info b { font-weight: 500; }
+  .info .CALL { color: #11b88f; } .info .PUT { color: var(--pink); }
+  .wfoot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding: 0 4px; }
+  .wfoot .bar { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .wfoot .bar i { width: 4px; height: 38px; border-radius: 2px; background: var(--teal); }
+  .wfoot .ring { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .wempty { text-align: center; color: #9aa1a9; padding: 26px 0 8px; }
+  .wempty b { display: block; color: var(--ink); font-size: 30px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pager { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+  .pager i { width: 6px; height: 6px; border-radius: 50%; background: #d7dbe0; cursor: pointer; }
+  .pager i.on { background: var(--ink); width: 16px; border-radius: 3px; }
+  .wbtn { display: block; margin: 14px auto 0; border: 0; background: var(--ink); color: #fff; border-radius: 8px; padding: 6px 16px; font-size: 12.5px; cursor: pointer; }
+
+  .seg { display: inline-flex; background: var(--card2); border-radius: 8px; padding: 2px; margin-right: 10px; vertical-align: middle; }
+  .seg button { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 3px 10px; border-radius: 6px; cursor: pointer; }
+  .seg button.on { background: var(--white); color: var(--ink); }
+  .legend2 { display: flex; gap: 16px; font-size: 12px; color: #c4ccd4; margin: -6px 0 4px; flex-wrap: wrap; }
+  .legend2 i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  select.pick { background: none; border: 0; color: var(--muted); font-size: 12.5px; cursor: pointer; outline: none; }
+  select.pick option { background: var(--card); color: var(--text); }
+  #areaSvg { width: 100%; height: 290px; display: block; overflow: visible; }
+  .axis { fill: var(--dim); font-size: 10.5px; font-family: Poppins, sans-serif; }
+
+  .donut { display: flex; align-items: center; gap: 18px; }
+  .donut svg { width: 170px; height: 170px; flex: none; }
+  .legend { display: grid; gap: 12px; font-size: 13px; }
+  .legend div { display: grid; grid-template-columns: 12px auto; column-gap: 8px; }
+  .legend i { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; }
+  .legend small { grid-column: 2; color: var(--muted); font-size: 12px; margin-top: -3px; }
+  #radarSvg { width: 100%; height: 215px; display: block; }
+  .rl { fill: #c4ccd4; font-size: 11px; font-family: Poppins, sans-serif; }
+  .rv { fill: var(--muted); font-size: 10.5px; font-family: Poppins, sans-serif; }
+  #tlSvg { width: 100%; height: 215px; display: block; }
+
+  /* ---------- ตาราง ---------- */
+  .chips { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .chip { padding: 6px 15px; border-radius: 9px; border: 0; background: var(--card); color: var(--muted); cursor: pointer; font-size: 13px; }
+  .chip.on { background: var(--white); color: var(--ink); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--muted); font-weight: 400; font-size: 12.5px; padding: 0 12px 10px; }
+  td { padding: 12px; border-top: 1px solid var(--line); vertical-align: middle; }
+  tbody tr[data-id], tbody tr[data-h] { cursor: pointer; }
+  tbody tr[data-id]:hover td, tbody tr[data-h]:hover td { background: #ffffff08; }
+  tr.open td { background: #ffffff05; }
+  tr.off { opacity: .42; }
+  .pairc { display: flex; align-items: center; gap: 10px; font-weight: 500; white-space: nowrap; }
+  .cur { width: 30px; height: 30px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; font-size: 10.5px; font-weight: 600; color: var(--lav); }
+  .dirp { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 8px; font-weight: 600; font-size: 12.5px; white-space: nowrap; }
+  .dirp.CALL { background: #7ff0d41f; color: var(--teal); } .dirp.PUT { background: #ec3b6326; color: #ff6f8e; }
+  .pill { display: inline-block; padding: 3px 11px; border-radius: 7px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .p-win { background: var(--teal); color: var(--ink); } .p-loss { background: var(--pink); color: #fff; }
+  .p-draw { background: var(--lav); color: var(--ink); } .p-wait { background: #ffffff14; color: var(--lav); }
+  .p-live { background: var(--white); color: var(--ink); }
+  .prog { width: 120px; height: 5px; border-radius: 3px; background: #ffffff12; overflow: hidden; margin-top: 6px; }
+  .prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--lav2), var(--lav)); }
+  .muted { color: var(--muted); font-size: 12px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .tag { font-size: 11px; padding: 2px 7px; border-radius: 6px; margin-left: 6px; white-space: nowrap; }
+  .t-star { background: #f3d36222; color: #c99a00; } .t-danger { background: #f3b56222; color: var(--warn); }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+  tr.fresh td { animation: fl 1.4s ease-out 2; }
+  @keyframes fl { 0% { background: #c9c4f230; } }
+  .btn { border: 0; border-radius: 9px; padding: 7px 15px; cursor: pointer; font-size: 13px; background: var(--card2); color: var(--text); display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+  .btn:hover { background: #303841; }
+  .btn.pri { background: var(--white); color: var(--ink); font-weight: 500; }
+  .btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+  /* ---------- ตลาด ---------- */
+  .mgrid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .mc { cursor: pointer; transition: transform .15s; }
+  .mc:hover { transform: translateY(-2px); }
+  .mc.hit { box-shadow: inset 0 0 0 1.5px var(--lav); }
+  .mc .hd { display: flex; align-items: center; gap: 10px; }
+  .mc .px { margin-left: auto; text-align: right; font-variant-numeric: tabular-nums; }
+  .mc .px b { display: block; font-weight: 500; }
+  .mc svg { width: 100%; height: 80px; display: block; margin-top: 10px; }
+  .mc .ft { display: flex; justify-content: space-between; margin-top: 6px; }
+  .up { color: var(--teal); } .down { color: #ff6f8e; }
+
+  /* ---------- สถิติ ---------- */
+  .sgrid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-bottom: 20px; }
+  .sgrid2 { display: grid; gap: 20px; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); margin-bottom: 20px; }
+  .sc { text-align: center; }
+  .sc svg { width: 110px; height: 110px; }
+  .sc .nm { font-size: 13px; margin-top: 4px; }
+  .sc .ci { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .cibar { position: relative; height: 6px; border-radius: 3px; background: #ffffff10; margin: 8px 6px 2px; }
+  .cibar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--lav2); }
+  .cibar b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--warn); }
+  #eqSvg, #daySvg { width: 100%; height: 230px; display: block; }
+  .heat { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; }
+  .heat div { border-radius: 8px; padding: 7px 0 6px; text-align: center; font-size: 11px; line-height: 1.25; background: #ffffff08; }
+  .heat div b { display: block; font-size: 12.5px; font-weight: 500; }
+  .heat div small { color: inherit; opacity: .75; }
+  .scale { display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); margin-top: 12px; flex-wrap: wrap; }
+  .scale i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  /* ---------- ตั้งค่า ---------- */
+  .setgrid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .field:first-of-type { border-top: 0; }
+  .field label { font-size: 13.5px; }
+  .field small { display: block; color: var(--muted); font-size: 12px; }
+  .inp { background: var(--card2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; width: 110px; text-align: right; outline: none; }
+  .inp:focus { border-color: var(--lav); }
+  input[type=range] { accent-color: var(--teal); width: 150px; }
+  code { background: var(--card2); padding: 3px 8px; border-radius: 6px; font-size: 12.5px; color: var(--lav); }
+  ol.how { margin: 0; padding-left: 20px; color: #c4ccd4; font-size: 13.5px; line-height: 1.9; }
+
+  /* ---------- ป๊อปอัปสัญญาณใหม่ ---------- */
+  .toasts { position: fixed; top: 18px; right: 18px; display: grid; gap: 12px; z-index: 50; width: 330px; max-width: calc(100vw - 36px); }
+  .toast { background: var(--white); color: var(--ink); border-radius: 16px; padding: 16px 18px; box-shadow: 0 18px 40px #0008;
+    animation: tin .35s cubic-bezier(.2, .9, .3, 1.2); position: relative; overflow: hidden; }
+  .toast.out { animation: tout .3s ease-in forwards; }
+  @keyframes tin { from { transform: translateX(120%); opacity: 0; } }
+  @keyframes tout { to { transform: translateX(120%); opacity: 0; } }
+  .toast .x { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 18px; color: #9aa1a9; cursor: pointer; }
+  .toast .row1 { display: flex; align-items: center; gap: 12px; }
+  .toast .bigdir { border-radius: 12px; padding: 8px 12px; font-weight: 700; font-size: 17px; color: #fff; }
+  .toast .bigdir.CALL { background: #11b88f; } .toast .bigdir.PUT { background: var(--pink); }
+  .toast .pp { font-weight: 600; font-size: 18px; }
+  .toast .tt { font-size: 12.5px; color: #6b7480; }
+  .toast .cd { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; font-size: 13px; }
+  .toast .cd b { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .toast .tb { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--lav2); transition: width .5s linear; }
+
+  /* ---------- หน้าต่างรายละเอียด ---------- */
+  .modal { position: fixed; inset: 0; background: #0b0e12b3; backdrop-filter: blur(3px); display: none; place-items: center; z-index: 60; padding: 16px; }
+  .modal.on { display: grid; }
+  .mbox { background: var(--card); border-radius: 18px; width: 640px; max-width: 100%; max-height: 92vh; overflow: auto; padding: 22px 24px; position: relative; }
+  .mbox .x { position: absolute; top: 12px; right: 14px; border: 0; background: none; font-size: 22px; color: var(--muted); cursor: pointer; }
+  .mhead { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+  .mhead .pp { font-size: 20px; font-weight: 500; }
+  .mgrid2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .mgrid2 div { background: var(--card2); border-radius: 10px; padding: 9px 12px; }
+  .mgrid2 span { display: block; font-size: 11.5px; color: var(--muted); }
+  .mgrid2 b { font-weight: 500; font-variant-numeric: tabular-nums; }
+  #mSvg { width: 100%; height: 220px; display: block; }
+  @media (max-width: 600px) { .mgrid2 { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="logo">
+      <svg viewBox="0 0 46 40"><path d="M4 30 L14 14 L22 24 L32 6 L42 20" fill="none" stroke="#ec3b63" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="6" r="3" fill="#7ff0d4"/></svg>
+      <b>SIGNAL M5</b>
+    </div>
+    <div class="nav">
+      <button class="on" data-v="home"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span class="t">ภาพรวม</span></button>
+      <button data-v="signals"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span class="t">สัญญาณ</span><span class="cnt" id="cnt"></span></button>
+      <button data-v="market"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 8-9"/><path d="M14 6h6v6"/></svg><span class="t">ตลาด</span></button>
+      <button data-v="stats"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="t">สถิติ</span></button>
+      <button data-v="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="t">ตั้งค่า</span></button>
+    </div>
+    <div class="me">
+      <div class="avatar"><div>📡</div></div>
+      <b>MetaTrader 5</b>
+      <small><span class="dot" id="dot"></span><span id="statusText">กำลังเชื่อมต่อ…</span></small>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <h1 id="title">ภาพรวม</h1>
+      <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="q" placeholder="ค้นหาคู่เงิน เช่น EURUSD"></label>
+      <div class="next" id="next">แท่งถัดไป <b id="countdown">--:--</b></div>
+      <div class="right">
+        <span class="muted" id="now"></span>
+        <button class="ico" id="notifyBtn" title="แจ้งเตือนบนหน้าจอ (นอกเบราว์เซอร์)"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></button>
+        <span class="swlbl">เสียง</span><button class="switch" id="soundBtn" title="เสียงแจ้งเตือน"></button>
+      </div>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <!-- ภาพรวม -->
+    <section class="view on" id="v-home">
+      <div class="alert">⚠ ผลทดสอบย้อนหลัง ~16 เดือน: ทุกเทคนิคชนะ 47–50% ต่ำกว่าจุดคุ้มทุน Binary (52–56% แล้วแต่อัตราจ่าย) — ใช้กับบัญชี <b>Demo</b> เพื่อเก็บผลจริงเท่านั้น</div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid">
+        <div class="card white"><h3>สัญญาณล่าสุด</h3><div id="latest"></div></div>
+        <div class="card span2">
+          <h3>กราฟแท่ง 5 นาที <span id="areaPair" style="color:var(--lav)"></span>
+            <span class="sub"><span class="seg" id="modeSeg"><button data-m="candle">แท่งเทียน</button><button data-m="line">เส้น</button></span>
+            <select class="pick" id="pairPick"></select></span></h3>
+          <div class="legend2"><span><i style="background:var(--lav)"></i>SMA5</span><span><i style="background:var(--teal)"></i>แท่งขึ้น</span><span><i style="background:var(--pink)"></i>แท่งลง</span><span><b style="color:var(--teal)">▲</b> / <b style="color:var(--pink)">▼</b> จุดที่เกิดสัญญาณ</span><span class="muted">60 แท่งล่าสุด · ชี้ที่แท่งเพื่อดูราคา</span></div>
+          <svg id="areaSvg"></svg>
+        </div>
+        <div class="card">
+          <h3>ผลจริงทั้งหมด <span class="sub" id="donutSub"></span></h3>
+          <div class="donut"><svg id="donutSvg" viewBox="0 0 170 170"></svg><div class="legend" id="legend"></div></div>
+        </div>
+        <div class="card">
+          <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>อัตราชนะแยกคู่เงิน</h3>
+          <svg id="radarSvg" viewBox="0 0 320 215"></svg>
+        </div>
+        <div class="card tl">
+          <h3>ไทม์ไลน์สัญญาณวันนี้ <span class="sub">เวลาไทย</span></h3>
+          <svg id="tlSvg"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- สัญญาณ -->
+    <section class="view" id="v-signals">
+      <div class="chips" id="filters">
+        <button class="chip on" data-f="all">ทั้งหมด</button>
+        <button class="chip" data-f="open">กำลังเทรด</button>
+        <button class="chip" data-f="CALL">CALL</button>
+        <button class="chip" data-f="PUT">PUT</button>
+        <button class="chip" data-f="star">★ แบบ A</button>
+        <button class="chip" data-f="mine">เฉพาะเทคนิคที่เลือก</button>
+        <span class="muted" style="margin-left:auto">สัญญาณตั้งแต่เปิดโปรแกรมรอบนี้ · คลิกแถวเพื่อดูรายละเอียด</span>
+      </div>
+      <div class="card"><table><thead><tr><th>คู่เงิน</th><th>ทิศ</th><th>เวลาเข้า</th><th class="hide-m">เทคนิค</th><th class="hide-m">ย้อนหลัง</th><th>สถานะ</th></tr></thead><tbody id="sigBody"></tbody></table></div>
+    </section>
+
+    <!-- ตลาด -->
+    <section class="view" id="v-market"><div class="mgrid" id="mgrid"></div></section>
+
+    <!-- สถิติ -->
+    <section class="view" id="v-stats">
+      <div class="chips" id="rangeChips">
+        <button class="chip on" data-r="all">ทั้งหมด</button>
+        <button class="chip" data-r="mine">เฉพาะเทคนิคที่เลือก</button>
+        <span class="muted" style="margin-left:auto">กำไรจำลองคิดจากเงินลงไม้ละ <b id="stakeTxt"></b> · จ่าย <b id="payTxt"></b> (แก้ได้ที่ ตั้งค่า)</span>
+      </div>
+      <div class="kpis" id="sKpis"></div>
+      <div class="sgrid2">
+        <div class="card"><h3>กำไร/ขาดทุนสะสม (จำลอง) <span class="sub" id="eqSub"></span></h3><svg id="eqSvg"></svg></div>
+        <div class="card"><h3>ผลรายวัน <span class="sub">14 วันล่าสุด</span></h3><svg id="daySvg"></svg></div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <h3>อัตราชนะตามชั่วโมง <span class="sub">เวลาไทย · ทุกเทคนิค</span></h3>
+        <div class="heat" id="heat"></div>
+        <div class="scale" id="heatScale"><span>สีจาง = ไม้น้อย ยังเชื่อไม่ได้</span></div>
+      </div>
+      <h3 style="font-weight:500;margin:0 0 12px">แยกตามเทคนิค <span class="muted">· แถบม่วง = ช่วงที่อัตราชนะจริงน่าจะอยู่ (ความเชื่อมั่น 95%), เส้นส้ม = จุดคุ้มทุน · ถ้าแถบม่วงอยู่ขวาเส้นส้มทั้งแถบ = ได้เปรียบจริง</span></h3>
+      <div class="sgrid" id="sgrid"></div>
+      <div class="card"><h3>ประวัติล่าสุด <span class="sub" id="histCount"></span>
+        <a class="btn" href="/live_log.csv" style="margin-left:12px"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/></svg>ดาวน์โหลด CSV</a></h3>
+        <table><thead><tr><th>เวลา</th><th>คู่เงิน</th><th>ทิศ</th><th class="hide-m">เทคนิค</th><th class="hide-m">ราคาเข้า → ปิด</th><th>ผล</th></tr></thead><tbody id="histBody"></tbody></table></div>
+    </section>
+
+    <!-- ตั้งค่า -->
+    <section class="view" id="v-settings">
+      <div class="setgrid">
+        <div class="card">
+          <h3>แจ้งเตือน</h3>
+          <div class="field"><label>เสียงแจ้งเตือน<small>เล่นเสียงเมื่อมีสัญญาณใหม่</small></label><button class="switch" id="sSound"></button></div>
+          <div class="field"><label>ความดังเสียง</label><input type="range" id="sVol" min="0.05" max="1" step="0.05"></div>
+          <div class="field"><label>ป๊อปอัปในหน้าเว็บ<small>การ์ดสัญญาณใหญ่มุมขวาบน พร้อมนับถอยหลัง</small></label><button class="switch" id="sToast"></button></div>
+          <div class="field"><label>แจ้งเตือนของ Windows<small>เด้งแม้ย่อหน้าต่างเบราว์เซอร์ไว้</small></label><button class="switch" id="sNotify"></button></div>
+          <div class="field"><label>ไม่เตือนช่วง 04–07 น.<small>ช่วงที่ผลย้อนหลังแย่ที่สุด (~46%)</small></label><button class="switch" id="sMute"></button></div>
+          <div class="field"><label>ทดสอบ</label><span><button class="btn" id="testBtn">ลองแจ้งเตือน</button></span></div>
+        </div>
+        <div class="card">
+          <h3>เทคนิคที่ต้องการให้เตือน</h3>
+          <div id="techList"></div>
+          <p class="muted" style="margin:10px 0 0">เทคนิคที่ปิดไว้จะไม่มีเสียง/ป๊อปอัป แต่ระบบยังจดผลไว้ทุกตัว เพื่อให้สถิติครบ</p>
+        </div>
+        <div class="card">
+          <h3>จำลองเงิน (บัญชี Demo)</h3>
+          <div class="field"><label>เงินลงต่อไม้ (บาท)</label><input class="inp" type="number" id="sStake" min="1" step="1"></div>
+          <div class="field"><label>อัตราจ่ายเมื่อชนะ (%)<small>เช่น ชนะได้ 80% ของเงินลง · แพ้เสียทั้งหมด · เสมอคืนเงิน</small></label><input class="inp" type="number" id="sPay" min="1" max="100" step="1"></div>
+          <div class="field"><label>จุดคุ้มทุน</label><b id="beTxt"></b></div>
+        </div>
+        <div class="card">
+          <h3>ดูบนมือถือ</h3>
+          <ol class="how">
+            <li>ปิดหน้าต่างโปรแกรมเดิม แล้วเปิดใหม่ด้วยคำสั่ง <code>python dashboard.py --lan</code><br>หรือดับเบิลคลิก <code>เปิดหน้าเว็บสัญญาณ (มือถือ).bat</code></li>
+            <li>หน้าต่างดำจะแสดงที่อยู่ เช่น <code>http://192.168.1.20:8765</code></li>
+            <li>มือถือต่อ Wi-Fi เดียวกับคอม แล้วเปิดที่อยู่นั้นใน Chrome/Safari</li>
+            <li>ถ้า Windows ถามเรื่อง Firewall ให้กด “อนุญาต”</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="modal" id="modal"><div class="mbox"><button class="x" id="mClose">×</button><div id="mBody"></div></div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const C = { teal: "#7ff0d4", pink: "#ec3b63", lav: "#c9c4f2", lav2: "#9d97d6", dim: "#5d6872", line: "#343d46", ink: "#2a3037", warn: "#f3b562" };
+const TITLES = { home: "ภาพรวม", signals: "สัญญาณ", market: "ตลาด", stats: "สถิติ", settings: "ตั้งค่า" };
+const TECH_NAMES = { "1": "1 แดงกลืนกินเขียว (PUT)", "2": "2 เขียวกลืนกินแดง (CALL)", "3": "3 แดงดาวตก (PUT)", "4": "4 เขียวบั้งไฟ (CALL)", "5": "5 เขียวใต้เส้น (PUT)", "6": "6 แดงบนเส้น (CALL)" };
+const seen = new Set();
+let st = null, first = true, lastOk = 0, view = "home", filter = "all", range = "all", pair = null, q = "", unread = 0, latestIdx = 0;
+
+// ---------- การตั้งค่า (เก็บในเบราว์เซอร์นี้) ----------
+function load(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+const S = Object.assign({ sound: false, vol: 0.5, toast: true, notify: false, mute: false, stake: 100, pay: 80, techs: {} }, load("settings", {}));
+const saveS = () => save("settings", S);
+if (S.notify && !("Notification" in window && Notification.permission === "granted")) S.notify = false;
+const techOn = name => S.techs[String(name)[0]] !== false;
+const alertable = s => techOn(s.tech) && !(S.mute && s.danger_time);
+pair = load("pair", null);
+let chartMode = load("chartMode", "candle");
+
+function paintSettings() {
+  $("#soundBtn").classList.toggle("on", S.sound); $("#sSound").classList.toggle("on", S.sound);
+  $("#notifyBtn").classList.toggle("on", S.notify); $("#sNotify").classList.toggle("on", S.notify);
+  $("#sToast").classList.toggle("on", S.toast); $("#sMute").classList.toggle("on", S.mute);
+  $("#sVol").value = S.vol; $("#sStake").value = S.stake; $("#sPay").value = S.pay;
+  $("#beTxt").textContent = (100 / (100 + +S.pay) * 100).toFixed(1) + "%";
+  $("#stakeTxt").textContent = money(S.stake, false); $("#payTxt").textContent = S.pay + "%";
+  const names = { ...TECH_NAMES }; (st?.techs || []).forEach(t => names[t.name[0]] = t.name);
+  $("#techList").innerHTML = Object.entries(names).map(([k, n]) => {
+    const t = (st?.techs || []).find(x => x.name[0] === k);
+    return `<div class="field"><label>${esc(n)}<small>ย้อนหลัง ${t ? t.wr + "%" : "–"}${t ? "" : " · ไม่ได้เปิดเฝ้าในรอบนี้"}</small></label><button class="switch${techOn(k) ? " on" : ""}" data-k="${k}"></button></div>`;
+  }).join("");
+  $$("#techList .switch").forEach(b => b.onclick = () => { S.techs[b.dataset.k] = !techOn(b.dataset.k); saveS(); paintSettings(); st && render(); });
+}
+const toggleSound = () => { S.sound = !S.sound; saveS(); paintSettings(); if (S.sound) beep(); };
+$("#soundBtn").onclick = toggleSound; $("#sSound").onclick = toggleSound;
+const toggleNotify = async () => {
+  if (!("Notification" in window)) return alert("เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน");
+  if (!S.notify && Notification.permission !== "granted") await Notification.requestPermission();
+  S.notify = !S.notify && Notification.permission === "granted"; saveS(); paintSettings();
+};
+$("#notifyBtn").onclick = toggleNotify; $("#sNotify").onclick = toggleNotify;
+$("#sToast").onclick = () => { S.toast = !S.toast; saveS(); paintSettings(); };
+$("#sMute").onclick = () => { S.mute = !S.mute; saveS(); paintSettings(); };
+$("#sVol").oninput = e => { S.vol = +e.target.value; saveS(); };
+$("#sVol").onchange = () => beep();
+$("#sStake").oninput = e => { if (+e.target.value > 0) { S.stake = +e.target.value; saveS(); paintSettings(); } };
+$("#sPay").oninput = e => { if (+e.target.value > 0) { S.pay = Math.min(100, +e.target.value); saveS(); paintSettings(); } };
+$("#testBtn").onclick = () => {
+  const t = new Date(thaiNow() + 300e3 - thaiNow() % 300e3).toISOString().slice(0, 16).replace("T", " ");
+  announce({ id: "test-" + Date.now(), pair: "EURUSD", dir: "CALL", tech: "ทดสอบการแจ้งเตือน", thai_time: t, wr: 50, result: null }, true);
+};
+
+// ---------- เปลี่ยนหน้า ----------
+function show(v) {
+  view = v;
+  $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  $$(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  $("#title").textContent = TITLES[v];
+  if (v === "signals") { unread = 0; paintUnread(); }
+  if (v === "settings") paintSettings();
+  st && render();
+}
+$$(".nav button").forEach(b => b.onclick = () => show(b.dataset.v));
+$$("#filters .chip").forEach(c => c.onclick = () => {
+  filter = c.dataset.f; $$("#filters .chip").forEach(x => x.classList.toggle("on", x === c)); renderSignals(new Set());
+});
+$$("#rangeChips .chip").forEach(c => c.onclick = () => {
+  range = c.dataset.r; $$("#rangeChips .chip").forEach(x => x.classList.toggle("on", x === c)); renderStats();
+});
+$("#q").oninput = e => {
+  q = e.target.value.trim().toUpperCase().replace("/", "");
+  const hit = Object.keys(st?.pairs || {}).find(p => q && p.includes(q));
+  if (hit) { pair = hit; save("pair", pair); }
+  st && render();
+};
+$("#pairPick").onchange = e => { pair = e.target.value; save("pair", pair); renderArea(); };
+function paintSeg() { $$("#modeSeg button").forEach(b => b.classList.toggle("on", b.dataset.m === chartMode)); }
+$$("#modeSeg button").forEach(b => b.onclick = () => { chartMode = b.dataset.m; save("chartMode", chartMode); paintSeg(); st && renderArea(); });
+paintSeg();
+function paintUnread() { const c = $("#cnt"); c.style.display = unread ? "grid" : "none"; c.textContent = unread; }
+
+// ---------- เสียง ----------
+let ac;
+function beep() {
+  try {
+    ac ??= new AudioContext();
+    [[0, 784], [0.16, 1046], [0.32, 1318]].forEach(([t, f]) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = "sine"; o.frequency.value = f; o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(0.35 * S.vol, ac.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.25);
+      o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 0.28);
+    });
+  } catch {}
+}
+
+// ---------- เวลา (เวลาไทย ไม่ขึ้นกับโซนเวลาเครื่อง) ----------
+const thaiNow = () => Date.now() + 7 * 3600e3;
+const thaiMs = s => Date.parse(s.replace(" ", "T") + ":00Z");
+const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const today = () => new Date(thaiNow()).toISOString().slice(0, 10);
+const money = (v, sign = true) => (sign && v > 0 ? "+" : v < 0 ? "−" : "") + "฿" + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const digits = p => p > 20 ? 3 : 5;
+
+function phase(s) {
+  if (s.result) return { cls: { "ชนะ": "p-win", "แพ้": "p-loss" }[s.result] || "p-draw", label: s.result, pct: 100, txt: "จบแล้ว", left: 0 };
+  const e = thaiMs(s.thai_time), n = thaiNow();
+  if (n < e) return { cls: "p-wait", label: "เตรียมเข้า", pct: 0, txt: `เข้าในอีก ${mmss(e - n)}`, left: e - n };
+  if (n < e + 300e3) return { cls: "p-live", label: "กำลังเทรด", pct: (n - e) / 3000, txt: `หมดอายุใน ${mmss(e + 300e3 - n)}`, left: e + 300e3 - n };
+  return { cls: "p-wait", label: "รอผล…", pct: 100, txt: "กำลังตรวจผล", left: 0 };
+}
+
+function tick() {
+  const t = thaiNow(), left = 300e3 - (t % 300e3);
+  $("#now").textContent = new Date(t).toISOString().slice(11, 19) + " น.";
+  $("#countdown").textContent = mmss(left);
+  $("#next").classList.toggle("soon", left <= 15e3);
+  if (Date.now() - lastOk > 8000) setStatus(false, "ติดต่อโปรแกรมไม่ได้");
+  if (st) { if (view === "home") renderLatest(); updateTimers(); }
+  updateToasts();
+}
+setInterval(tick, 500);
+function setStatus(ok, t) { $("#dot").className = "dot " + (ok ? "ok" : "bad"); $("#statusText").textContent = t; }
+
+// ---------- คำนวณผล ----------
+const BE = () => 100 / (100 + +S.pay) * 100;  // จุดคุ้มทุน (%)
+const PTS = () => ({ W: S.stake * S.pay / 100, L: -S.stake, D: 0 });
+function seqFor(r) { return (st.seq || []).filter(x => r !== "mine" || techOn(x[1])); }
+function streak(seq) {
+  const s = seq.map(x => x[0]).filter(c => c !== "D");
+  if (!s.length) return { n: 0, c: "" };
+  let n = 0; const c = s.at(-1);
+  for (let i = s.length - 1; i >= 0 && s[i] === c; i--) n++;
+  return { n, c };
+}
+function wilson(w, n) {  // ช่วงความเชื่อมั่น 95%
+  if (!n) return [0, 0];
+  const z = 1.96, p = w / n, d = 1 + z * z / n, c = p + z * z / (2 * n), m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n));
+  return [(c - m) / d, (c + m) / d];
+}
+function tally(rows) { const o = { W: 0, L: 0, D: 0 }; rows.forEach(r => o[{ "ชนะ": "W", "แพ้": "L", "เสมอ": "D" }[r.result] || "D"]++); return o; }
+
+// ---------- ตัวช่วยวาด ----------
+function smooth(pts) {
+  if (pts.length < 2) return "";
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    d += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+function ringSvg(pct, color, size, stroke, label, sub) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r, cx = size / 2;
+  return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${C.line}" stroke-width="${stroke}"/>
+    <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
+      stroke-dasharray="${c * Math.min(pct, 100) / 100} ${c}" transform="rotate(-90 ${cx} ${cx})"/>
+    <text x="${cx}" y="${cx + (sub ? -2 : 5)}" text-anchor="middle" fill="#e9edf1" font-size="${size / 6.5}" font-family="Poppins">${label}</text>
+    ${sub ? `<text x="${cx}" y="${cx + 15}" text-anchor="middle" fill="#8b96a1" font-size="11" font-family="Prompt">${sub}</text>` : ""}</svg>`;
+}
+const IC = {
+  list: '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+  coin: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.7 0-3 .9-3 2s1.3 1.8 3 2 3 .9 3 2-1.3 2-3 2c-1 0-2-.5-2.5-1.5M12 6v2m0 8v2"/></svg>',
+  fire: '<svg viewBox="0 0 24 24"><path d="M12 22c4 0 7-3 7-7 0-5-5-7-5-12-3 2-5 5-5 8-1-1-2-2-2-4-1 2-2 4-2 7 0 5 3 8 7 8z"/></svg>',
+  down: '<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 11v6h-6"/></svg>',
+};
+function kpi(icon, color, value, label) {
+  return `<div class="card kpi"><div class="ic" style="background:${color}22;color:${color}">${IC[icon]}</div><div><b>${value}</b><span>${label}</span></div></div>`;
+}
+
+// ---------- KPI วันนี้ ----------
+function renderKpis() {
+  const rows = (st.today_rows || []).filter(r => techOn(r.tech));
+  const t = tally(rows), n = t.W + t.L, wr = n ? t.W / n * 100 : 0, P = PTS();
+  const pnl = t.W * P.W + t.L * P.L;
+  const sk = streak(rows.map(r => ({ "ชนะ": "W", "แพ้": "L", "เสมอ": "D" }[r.result] || "D")));
+  const be = 100 / (100 + +S.pay) * 100;
+  $("#kpis").innerHTML =
+    kpi("list", C.lav, rows.length, "ไม้วันนี้ (เทคนิคที่เลือก)") +
+    kpi("target", n && wr >= be ? C.teal : C.pink, n ? wr.toFixed(1) + "%" : "–", `อัตราชนะวันนี้ · คุ้มทุน ${be.toFixed(1)}%`) +
+    kpi("coin", pnl >= 0 ? C.teal : C.pink, `<span class="${pnl >= 0 ? "up" : "down"}">${money(pnl)}</span>`, `กำไรจำลองวันนี้ (ไม้ละ ${money(S.stake, false)})`) +
+    kpi("fire", sk.c === "W" ? C.teal : sk.c === "L" ? C.pink : C.dim, sk.n ? `${sk.c === "W" ? "ชนะ" : "แพ้"} ${sk.n} ติด` : "–", "สตรีคปัจจุบัน");
+}
+
+// ---------- การ์ดขาว: สัญญาณล่าสุด ----------
+function renderLatest() {
+  let sigs = (st.signals || []).slice().reverse().slice(0, 6);
+  if (!sigs.length) sigs = (st.today_rows || []).slice(-6).reverse().map(r => ({ ...r, id: "h-" + r.thai_time + r.pair + r.tech,
+    setup_a: r.setup_a === "True", danger_time: r.danger_time === "True", wr: (st.techs || []).find(t => t.name === r.tech)?.wr ?? "–" }));
+  if (!sigs.length) {
+    $("#latest").innerHTML = `<div class="wempty">ยังไม่มีสัญญาณ<b>${mmss(300e3 - thaiNow() % 300e3)}</b>จนกว่าจะตรวจรอบถัดไป<br><small>ระบบตรวจ 9 คู่เงินทุกครั้งที่แท่ง 5 นาทีปิด</small></div>`;
+    return;
+  }
+  latestIdx = Math.min(latestIdx, sigs.length - 1);
+  const s = sigs[latestIdx], ph = phase(s);
+  const ringPct = s.result ? 100 : ph.label === "กำลังเทรด" ? ph.pct : ph.label === "เตรียมเข้า" ? Math.max(0, 100 - ph.left / 3000) : 100;
+  const ringCol = s.result === "ชนะ" ? "#11b88f" : s.result === "แพ้" ? C.pink : s.result ? C.lav2 : C.pink;
+  const r = 15, c = 2 * Math.PI * r;
+  const timeTxt = s.result ? s.result : ph.left ? mmss(ph.left) : "…";
+  $("#latest").innerHTML = `<div class="info">
+      <span>คู่เงิน</span><b>${esc(s.pair.slice(0, 3))}/${esc(s.pair.slice(3))}${s.setup_a ? ' <span class="tag t-star">★ แบบ A</span>' : ""}</b>
+      <span>ทิศทาง</span><b class="${esc(s.dir)}">${s.dir === "CALL" ? "▲ CALL (ขึ้น)" : "▼ PUT (ลง)"}</b>
+      <span>เวลาเข้า</span><b>${esc(s.thai_time.slice(11))} น.</b>
+      <span>เทคนิค</span><b>${esc(s.tech)}</b>
+      <span>ย้อนหลัง</span><b>${esc(s.wr)}%${s.danger_time ? ' <span class="tag t-danger">04–07 น.</span>' : ""}</b>
+    </div>
+    <div class="wfoot">
+      <div class="bar"><i></i><div><b style="font-weight:500">5 นาที</b><br><small style="color:#9aa1a9">หมดอายุ</small></div></div>
+      <div class="ring"><b style="font-weight:500">${esc(timeTxt)}</b>
+        <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="${r}" fill="none" stroke="#eceef1" stroke-width="4"/>
+        <circle cx="20" cy="20" r="${r}" fill="none" stroke="${ringCol}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c * ringPct / 100} ${c}" transform="rotate(-90 20 20)"/></svg>
+        <span style="color:#9aa1a9">${esc(ph.label)}</span></div>
+    </div>
+    ${sigs.length > 1 ? `<div class="pager">${sigs.map((_, i) => `<i class="${i === latestIdx ? "on" : ""}" data-i="${i}"></i>`).join("")}</div>` : ""}
+    <button class="wbtn" data-open="${esc(s.id)}">ดูรายละเอียด</button>`;
+  $$("#latest .pager i").forEach(i => i.onclick = () => { latestIdx = +i.dataset.i; renderLatest(); });
+  $("#latest .wbtn").onclick = () => openSignal(s);
+}
+
+// ---------- กราฟแท่งเทียน (ใช้ทั้งกราฟใหญ่และหน้าต่างรายละเอียด) ----------
+function candleChart(svg, bars, opt = {}) {
+  const W = svg.clientWidth || 700, H = opt.H || 290, L = 12, R = 66, T = 26, B = 24;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  if (bars.length < 2) { svg.innerHTML = ""; return; }
+  const ys = bars.flatMap(b => [b.h, b.l]).concat(opt.levels?.map(l => l.v) || []);
+  const hi = Math.max(...ys), lo = Math.min(...ys), pad = (hi - lo) * 0.06 || 1e-4;
+  const y = v => T + (hi + pad - v) / (hi - lo + 2 * pad) * (H - T - B);
+  const step = (W - L - R) / bars.length, x = i => L + step * (i + 0.5);
+  let g = `<defs><linearGradient id="ag${opt.id || ""}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.lav}" stop-opacity=".9"/><stop offset="1" stop-color="${C.lav2}" stop-opacity=".04"/></linearGradient></defs>`;
+  for (let k = 0; k <= 5; k++) {
+    const v = lo - pad + (hi - lo + 2 * pad) * k / 5, yy = y(v);
+    g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="${C.line}" stroke-dasharray="2 4"/><text x="${W - R + 8}" y="${yy + 3.5}" class="axis">${v.toFixed(digits(v))}</text>`;
+  }
+  const every = Math.max(1, Math.round(bars.length / 10));
+  bars.forEach((b, i) => { if (i % every === 0) g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" class="axis">${b.t}</text>`; });
+  (opt.marks || []).forEach(s => {
+    const i = bars.findIndex(b => b.t === s.thai_time.slice(11));
+    if (i < 0) return;
+    const col = s.dir === "CALL" ? C.teal : C.pink;
+    g += `<rect x="${x(i) - step / 2}" y="${T}" width="${step}" height="${H - T - B}" fill="${col}" opacity="${opt.focus === s ? ".18" : ".10"}"/>
+          <g><title>${esc(s.pair)} ${s.dir} เข้า ${esc(s.thai_time.slice(11))} น. · ${esc(s.tech)}${s.result ? " · " + esc(s.result) : ""}</title>
+          <circle cx="${x(i)}" cy="${T - 11}" r="8" fill="${col}"/><text x="${x(i)}" y="${T - 7.5}" text-anchor="middle" font-size="9" fill="${s.dir === "CALL" ? C.ink : "#fff"}">${s.dir === "CALL" ? "▲" : "▼"}</text></g>`;
+  });
+  if (opt.mode === "line") {
+    const line = smooth(bars.map((b, i) => [x(i), y(b.c)]));
+    g += `<path d="${line} L${x(bars.length - 1)},${H - B} L${x(0)},${H - B} Z" fill="url(#ag${opt.id || ""})"/><path d="${line}" fill="none" stroke="${C.lav}" stroke-width="2"/>`;
+  } else {
+    const bw = Math.max(2, Math.min(14, step * 0.62));
+    bars.forEach((b, i) => {
+      const col = b.c >= b.o ? C.teal : C.pink, top = y(Math.max(b.o, b.c)), bot = y(Math.min(b.o, b.c));
+      g += `<g${opt.live && i === bars.length - 1 ? ' opacity=".75"' : ""}><line x1="${x(i)}" x2="${x(i)}" y1="${y(b.h)}" y2="${y(b.l)}" stroke="${col}" stroke-width="1.2"/>
+            <rect x="${x(i) - bw / 2}" y="${top}" width="${bw}" height="${Math.max(1.2, bot - top)}" rx="1.5" fill="${col}"><title>${b.t} น.  เปิด ${b.o.toFixed(digits(b.o))}  สูง ${b.h.toFixed(digits(b.o))}  ต่ำ ${b.l.toFixed(digits(b.o))}  ปิด ${b.c.toFixed(digits(b.o))}</title></rect></g>`;
+    });
+  }
+  const sma = bars.map((b, i) => b.sma5 == null ? null : [x(i), y(b.sma5)]).filter(Boolean);
+  g += `<path d="${smooth(sma)}" fill="none" stroke="${opt.mode === "line" ? C.teal : C.lav}" stroke-width="1.6" ${opt.mode === "line" ? 'stroke-dasharray="4 4"' : ""}/>`;
+  (opt.levels || []).forEach(l => {
+    const py = y(l.v);
+    g += `<line x1="${L}" x2="${W - R}" y1="${py}" y2="${py}" stroke="${l.c}" stroke-dasharray="3 3" opacity=".85"/>
+          <rect x="${W - R + 2}" y="${py - 10}" width="${R - 4}" height="20" rx="5" fill="${l.c}"/>
+          <text x="${W - R / 2}" y="${py + 4}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${l.dark ? C.ink : "#fff"}" font-family="Poppins">${l.v.toFixed(digits(l.v))}</text>
+          ${l.label ? `<text x="${L + 4}" y="${py - 5}" font-size="10.5" fill="${l.c}" font-family="Prompt">${l.label}</text>` : ""}`;
+  });
+  svg.innerHTML = g;
+}
+
+function renderArea() {
+  const pairs = Object.keys(st.pairs || {}).sort();
+  const svg = $("#areaSvg");
+  if (!pairs.length) { svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" class="axis">รอข้อมูลจาก MT5…</text>`; return; }
+  if (!pairs.includes(pair)) pair = pairs[0];
+  const pick = $("#pairPick");
+  if (pick.options.length !== pairs.length) pick.innerHTML = pairs.map(p => `<option>${p}</option>`).join("");
+  pick.value = pair;
+  $("#areaPair").textContent = pair.slice(0, 3) + "/" + pair.slice(3);
+  const d = st.pairs[pair], bars = (d.candles || []).map(b => ({ ...b }));
+  if (!bars.length) return;
+  const px = d.price ?? bars.at(-1).c, last = bars.at(-1);  // แท่งสุดท้ายกำลังวิ่ง
+  last.c = px; last.h = Math.max(last.h, px); last.l = Math.min(last.l, px);
+  const up = px >= last.o;
+  candleChart(svg, bars, { mode: chartMode, live: true, marks: (st.signals || []).filter(s => s.pair === pair),
+    levels: [{ v: px, c: up ? C.teal : C.pink, dark: up }] });
+}
+
+// ---------- วงแหวนผลจริง ----------
+function sumStats() { const o = { "ชนะ": 0, "แพ้": 0, "เสมอ": 0 }; Object.values(st.stats || {}).forEach(s => Object.keys(o).forEach(k => o[k] += s[k] || 0)); return o; }
+function renderDonut() {
+  const k = sumStats();
+  const open = (st.signals || []).filter(s => !s.result).length;
+  const segs = [["ชนะ", k["ชนะ"], C.teal], ["แพ้", k["แพ้"], C.pink], ["เสมอ", k["เสมอ"], C.lav], ["รอผล", open, "#8b96a1"]];
+  const total = segs.reduce((a, s) => a + s[1], 0), n = k["ชนะ"] + k["แพ้"];
+  const r = 70, c = 2 * Math.PI * r, used = segs.filter(s => s[1]).length, gap = used > 1 ? 12 : 0;
+  let off = 0, g = `<circle cx="85" cy="85" r="${r}" fill="none" stroke="${C.line}" stroke-width="9"/>`;
+  segs.forEach(([, v, col]) => {
+    if (!v) return;
+    const len = Math.max(1, c * v / total - gap);
+    g += `<circle cx="85" cy="85" r="${r}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${len} ${c}" stroke-dashoffset="${-off}" transform="rotate(-90 85 85)"/>`;
+    off += c * v / total;
+  });
+  g += `<text x="85" y="78" text-anchor="middle" fill="#8b96a1" font-size="12" font-family="Prompt">ทั้งหมด</text>
+        <text x="85" y="102" text-anchor="middle" fill="#e9edf1" font-size="20" font-family="Poppins">${total} ไม้</text>`;
+  $("#donutSvg").innerHTML = g;
+  $("#donutSub").textContent = n ? `ชนะ ${(k["ชนะ"] / n * 100).toFixed(1)}%` : "";
+  $("#legend").innerHTML = segs.map(([nm, v, col]) => `<div><i style="background:${col}"></i>${nm}<small>${v} ไม้</small></div>`).join("");
+}
+
+// ---------- เรดาร์ ----------
+function renderRadar() {
+  const pairs = Object.keys(st.pairs || {}).sort();
+  const P = pairs.length ? pairs : ["AUDUSD", "EURGBP", "EURJPY", "EURUSD", "GBPJPY", "GBPUSD", "NZDUSD", "USDCHF", "USDJPY"];
+  const cx = 160, cy = 108, R = 76, N = P.length;
+  const pt = (i, f) => [cx + Math.sin(2 * Math.PI * i / N) * R * f, cy - Math.cos(2 * Math.PI * i / N) * R * f];
+  const poly = f => P.map((_, i) => pt(i, typeof f === "function" ? f(i) : f).join(",")).join(" ");
+  let g = `<polygon points="${poly(1)}" fill="none" stroke="#4a545e"/><polygon points="${poly(BE() / 100)}" fill="none" stroke="${C.dim}" stroke-dasharray="3 3"/>`;
+  P.forEach((_, i) => { const [x, y] = pt(i, 1); g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#3a434c"/>`; });
+  const wr = p => { const a = (st.pairs_agg || {})[p]; return a && a[0] + a[1] ? a[0] / (a[0] + a[1]) : null; };
+  if (P.some(p => wr(p) != null)) g += `<polygon points="${poly(i => Math.max(wr(P[i]) ?? 0, 0.03))}" fill="#ec3b6322" stroke="${C.pink}" stroke-width="1.6" stroke-linejoin="round"/>`;
+  P.forEach((p, i) => {
+    const [x, y] = pt(i, 1.22), v = wr(p), a = (st.pairs_agg || {})[p];
+    const anchor = Math.abs(x - cx) < 8 ? "middle" : x > cx ? "start" : "end";
+    g += `<text x="${x}" y="${y - 2}" text-anchor="${anchor}" class="rl">${p}</text>
+          <text x="${x}" y="${y + 11}" text-anchor="${anchor}" class="rv">${v != null ? (v * 100).toFixed(0) + "% · " + (a[0] + a[1]) + " ไม้" : "–"}</text>`;
+  });
+  $("#radarSvg").innerHTML = g;
+}
+
+// ---------- ไทม์ไลน์วันนี้ ----------
+function renderTimeline() {
+  const svg = $("#tlSvg"), W = svg.clientWidth || 400, H = 215, L = 100, R = 12, T = 6, B = 24;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const techs = (st.techs || []).map(t => t.name);
+  const day = today();
+  const items = [...(st.today_rows || []), ...(st.signals || []).filter(s => !s.result && s.thai_time.startsWith(day))];
+  items.forEach(r => techs.includes(r.tech) || techs.push(r.tech));
+  if (!techs.length) { svg.innerHTML = ""; return; }
+  const rowH = (H - T - B) / techs.length, x = h => L + h / 24 * (W - L - R);
+  let g = `<rect x="${x(4)}" y="${T}" width="${x(7) - x(4)}" height="${H - T - B}" fill="#f3b5620f"/>
+           <text x="${(x(4) + x(7)) / 2}" y="${H - B - 4}" text-anchor="middle" font-size="9.5" fill="#f3b56299" font-family="Prompt">ช่วงแย่สุด</text>`;
+  for (let h = 0; h <= 24; h += 4) g += `<line x1="${x(h)}" x2="${x(h)}" y1="${T}" y2="${H - B}" stroke="${C.line}" stroke-dasharray="2 4"/><text x="${x(h)}" y="${H - 6}" text-anchor="middle" class="axis">${String(h).padStart(2, "0")}:00</text>`;
+  const nowH = (thaiNow() % 86400e3) / 3600e3;
+  g += `<line x1="${x(nowH)}" x2="${x(nowH)}" y1="${T}" y2="${H - B}" stroke="${C.lav}" opacity=".6"/>`;
+  techs.forEach((t, k) => {
+    g += `<text x="${L - 10}" y="${T + rowH * k + rowH / 2 + 4}" text-anchor="end" class="axis" style="font-family:Prompt;${techOn(t) ? "" : "opacity:.4"}">${esc(t.replace(/\s*\(.*\)/, "").slice(0, 17))}</text>`;
+  });
+  items.forEach(r => {
+    const k = techs.indexOf(r.tech), [hh, mm] = r.thai_time.slice(11).split(":").map(Number), h = hh + mm / 60;
+    const col = r.result === "ชนะ" ? C.teal : r.result === "แพ้" ? C.pink : r.result ? C.lav : "#fff";
+    const w = Math.max(6, x(h + 5 / 60) - x(h)), yy = T + rowH * k + rowH / 2;
+    g += `<rect x="${x(h) - 1}" y="${yy - 7}" width="${w}" height="14" rx="3" fill="${col}" opacity="${techOn(r.tech) ? 1 : .35}"><title>${esc(r.pair)} ${esc(r.dir)} ${esc(r.thai_time.slice(11))} ${esc(r.result || "รอผล")}</title></rect>`;
+  });
+  svg.innerHTML = g;
+}
+
+// ---------- หน้า สัญญาณ ----------
+function curBadge(p) { return `<div class="pairc"><span class="cur">${esc(p.slice(0, 3))}</span>${esc(p.slice(0, 3))}/${esc(p.slice(3))}</div>`; }
+function renderSignals(fresh) {
+  let sigs = (st.signals || []).slice().reverse();
+  if (q) sigs = sigs.filter(s => s.pair.includes(q));
+  if (filter === "open") sigs = sigs.filter(s => !s.result);
+  else if (filter === "star") sigs = sigs.filter(s => s.setup_a);
+  else if (filter === "mine") sigs = sigs.filter(alertable);
+  else if (filter !== "all") sigs = sigs.filter(s => s.dir === filter);
+  $("#sigBody").innerHTML = sigs.slice(0, 100).map(s => {
+    const ph = phase(s);
+    return `<tr data-id="${esc(s.id)}" class="${s.result ? "" : "open"}${fresh.has(s.id) ? " fresh" : ""}${alertable(s) ? "" : " off"}">
+      <td>${curBadge(s.pair)}</td>
+      <td><span class="dirp ${esc(s.dir)}">${s.dir === "CALL" ? "▲" : "▼"} ${esc(s.dir)}</span></td>
+      <td><b style="font-weight:500">${esc(s.thai_time.slice(11))}</b> <span class="muted">น.</span></td>
+      <td class="hide-m">${esc(s.tech)}${s.setup_a ? '<span class="tag t-star">★ A</span>' : ""}${s.danger_time ? '<span class="tag t-danger">04–07 น.</span>' : ""}</td>
+      <td class="hide-m">${esc(s.wr)}%</td>
+      <td><span class="pill ${ph.cls}">${esc(ph.label)}</span><div class="muted timer">${ph.txt}</div><div class="prog"><i style="width:${ph.pct}%"></i></div></td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="6" class="empty">ยังไม่มีสัญญาณ${filter !== "all" || q ? "ในหมวดนี้" : " — ระบบจะแจ้งทันทีเมื่อเจอ"}</td></tr>`;
+  const by = Object.fromEntries((st.signals || []).map(s => [s.id, s]));
+  $$("#sigBody tr[data-id]").forEach(tr => tr.onclick = () => openSignal(by[tr.dataset.id]));
+}
+function updateTimers() {
+  if (view !== "signals") return;
+  const by = Object.fromEntries((st.signals || []).map(s => [s.id, s]));
+  $$("#sigBody tr[data-id]").forEach(tr => {
+    const s = by[tr.dataset.id]; if (!s) return; const ph = phase(s);
+    tr.querySelector(".timer").textContent = ph.txt;
+    const p = tr.querySelector(".pill"); p.className = "pill " + ph.cls; p.textContent = ph.label;
+    tr.querySelector(".prog i").style.width = ph.pct + "%";
+  });
+}
+
+// ---------- หน้า ตลาด ----------
+function renderMarket() {
+  const open = (st.signals || []).filter(s => !s.result);
+  const pairs = Object.entries(st.pairs || {}).sort().filter(([p]) => !q || p.includes(q));
+  const agg = st.pairs_agg || {};
+  $("#mgrid").innerHTML = pairs.map(([p, d]) => {
+    const c = d.candles || [], px = d.price ?? c.at(-1)?.c, o = c[0]?.o;
+    const ch = o && px ? (px - o) / o * 100 : 0, up = ch >= 0, col = up ? C.teal : C.pink;
+    const hit = open.find(s => s.pair === p), a = agg[p], n = a ? a[0] + a[1] : 0;
+    const smaPos = c.at(-1)?.sma5 != null && px != null ? (px >= c.at(-1).sma5 ? "เหนือ SMA5" : "ใต้ SMA5") : "";
+    let path = "";
+    if (c.length > 1) {
+      const hi = Math.max(...c.map(b => b.c)), lo = Math.min(...c.map(b => b.c)), r = hi - lo || 1;
+      const l = smooth(c.map((b, i) => [i / (c.length - 1) * 300, 6 + (hi - b.c) / r * 68]));
+      path = `<defs><linearGradient id="g${p}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+        <path d="${l} L300,80 L0,80 Z" fill="url(#g${p})"/><path d="${l}" fill="none" stroke="${col}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>`;
+    }
+    return `<div class="card mc${hit ? " hit" : ""}" data-p="${p}">
+      <div class="hd">${curBadge(p)}<div class="px"><b>${px != null ? px.toFixed(digits(px)) : "–"}</b><span class="${up ? "up" : "down"}">${up ? "+" : ""}${ch.toFixed(2)}%</span></div></div>
+      <svg viewBox="0 0 300 80" preserveAspectRatio="none">${path}</svg>
+      <div class="ft"><span class="muted">${hit ? `<span style="color:${hit.dir === "CALL" ? C.teal : C.pink}">⚡ ${hit.dir} เข้า ${hit.thai_time.slice(11)}</span>` : smaPos}</span>
+        <span class="muted">${n ? `ชนะจริง ${(a[0] / n * 100).toFixed(0)}% · ${n} ไม้` : "ยังไม่มีผลจริง"}</span></div></div>`;
+  }).join("") || '<div class="empty">รอข้อมูลจาก MT5…</div>';
+  $$(".mc").forEach(el => el.onclick = () => { pair = el.dataset.p; save("pair", pair); show("home"); });
+}
+
+// ---------- หน้า สถิติ ----------
+function renderStats() {
+  paintSettings();
+  const seq = seqFor(range), P = PTS();
+  const W = seq.filter(x => x[0] === "W").length, L = seq.filter(x => x[0] === "L").length, n = W + L;
+  let eq = 0, peak = 0, dd = 0; const curve = [0];
+  seq.forEach(x => { eq += P[x[0]]; curve.push(eq); peak = Math.max(peak, eq); dd = Math.min(dd, eq - peak); });
+  const be = 100 / (100 + +S.pay) * 100, wr = n ? W / n * 100 : 0, [lo, hi] = wilson(W, n);
+  $("#sKpis").innerHTML =
+    kpi("list", C.lav, seq.length, "ไม้ที่จดผลแล้ว") +
+    kpi("target", n && wr >= be ? C.teal : C.pink, n ? wr.toFixed(1) + "%" : "–", n ? `ช่วงจริงน่าจะอยู่ ${(lo * 100).toFixed(0)}–${(hi * 100).toFixed(0)}% · คุ้มทุน ${be.toFixed(1)}%` : "อัตราชนะ") +
+    kpi("coin", eq >= 0 ? C.teal : C.pink, `<span class="${eq >= 0 ? "up" : "down"}">${money(eq)}</span>`, "กำไร/ขาดทุนจำลองรวม") +
+    kpi("down", C.pink, money(dd), "ติดลบหนักสุดจากจุดสูงสุด (Max DD)");
+
+  // กราฟกำไรสะสม
+  const svg = $("#eqSvg"), w = svg.clientWidth || 600, h = 230, l = 56, r = 12, t = 12, b = 22;
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  $("#eqSub").textContent = seq.length ? `${seq.length} ไม้` : "";
+  if (curve.length > 1) {
+    const raw = (Math.max(...curve, 0) - Math.min(...curve, 0)) / 4 || 1, mag = 10 ** Math.floor(Math.log10(raw));
+    const stp = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v >= raw);
+    const mx = Math.ceil(Math.max(...curve, 0) / stp) * stp, mn = Math.floor(Math.min(...curve, 0) / stp) * stp, span = (mx - mn) || 1;
+    const y = v => t + (mx - v) / span * (h - t - b), x = i => l + i / (curve.length - 1) * (w - l - r);
+    const col = eq >= 0 ? C.teal : C.pink;
+    let g = `<defs><linearGradient id="eqg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>`;
+    for (let v = mn; v <= mx + 1e-9; v += stp) { g += `<line x1="${l}" x2="${w - r}" y1="${y(v)}" y2="${y(v)}" stroke="${C.line}" stroke-dasharray="2 4"/><text x="${l - 8}" y="${y(v) + 3.5}" text-anchor="end" class="axis">${money(v)}</text>`; }
+    g += `<line x1="${l}" x2="${w - r}" y1="${y(0)}" y2="${y(0)}" stroke="#6b7682"/>`;
+    const pts = curve.map((v, i) => `${x(i)},${y(v)}`).join(" L");
+    g += `<path d="M${pts} L${x(curve.length - 1)},${y(0)} L${l},${y(0)} Z" fill="url(#eqg)"/><path d="M${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>`;
+    g += `<circle cx="${x(curve.length - 1)}" cy="${y(eq)}" r="4" fill="#fff"/><text x="${l}" y="${h - 4}" class="axis">ไม้แรก</text><text x="${w - r}" y="${h - 4}" text-anchor="end" class="axis">ล่าสุด</text>`;
+    svg.innerHTML = g;
+  } else svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" class="axis" style="font-family:Prompt">ยังไม่มีผล</text>`;
+
+  // รายวัน
+  const ds = $("#daySvg"), dw = ds.clientWidth || 400, dh = 230, dl = 30, dr = 8, dt = 18, db = 22;
+  ds.setAttribute("viewBox", `0 0 ${dw} ${dh}`);
+  const days = Object.entries(st.days || {}).sort().slice(-14);
+  if (days.length) {
+    const mx = Math.max(...days.map(([, v]) => v[0] + v[1] + v[2]), 1), bw = (dw - dl - dr) / days.length;
+    const y = v => dh - db - v / mx * (dh - dt - db);
+    let g = "";
+    for (let k = 0; k <= 4; k++) { const v = Math.round(mx * k / 4); g += `<line x1="${dl}" x2="${dw - dr}" y1="${y(v)}" y2="${y(v)}" stroke="${C.line}" stroke-dasharray="2 4"/><text x="${dl - 6}" y="${y(v) + 3.5}" text-anchor="end" class="axis">${v}</text>`; }
+    days.forEach(([d, [w2, l2, d2]], i) => {
+      const ww = Math.min(46, bw * 0.6), cx = dl + bw * i + (bw - ww) / 2, nn = w2 + l2;
+      g += `<rect x="${cx}" y="${y(w2)}" width="${ww}" height="${dh - db - y(w2)}" rx="3" fill="${C.teal}"><title>${d}: ชนะ ${w2}</title></rect>
+            <rect x="${cx}" y="${y(w2 + l2)}" width="${ww}" height="${y(w2) - y(w2 + l2)}" rx="3" fill="${C.pink}"><title>${d}: แพ้ ${l2}</title></rect>
+            <rect x="${cx}" y="${y(w2 + l2 + d2)}" width="${ww}" height="${y(w2 + l2) - y(w2 + l2 + d2)}" rx="3" fill="${C.lav}"><title>${d}: เสมอ ${d2}</title></rect>
+            <text x="${cx + ww / 2}" y="${y(w2 + l2 + d2) - 5}" text-anchor="middle" class="axis" fill="${nn && w2 / nn >= be / 100 ? C.teal : "#8b96a1"}">${nn ? Math.round(w2 / nn * 100) + "%" : ""}</text>
+            <text x="${cx + ww / 2}" y="${dh - 6}" text-anchor="middle" class="axis">${d.slice(8)}/${d.slice(5, 7)}</text>`;
+    });
+    ds.innerHTML = g;
+  } else ds.innerHTML = `<text x="50%" y="50%" text-anchor="middle" class="axis" style="font-family:Prompt">ยังไม่มีผล</text>`;
+
+  // แผนที่ความร้อนตามชั่วโมง
+  $("#heatScale").innerHTML = `<span><i style="background:var(--teal)"></i>≥ ${be.toFixed(1)}% (เกินจุดคุ้มทุน)</span><span><i style="background:var(--lav2)"></i>${(be - 4).toFixed(1)}–${be.toFixed(1)}%</span><span><i style="background:var(--pink)"></i>&lt; ${(be - 4).toFixed(1)}%</span><span>สีจาง = ไม้น้อย ยังเชื่อไม่ได้</span>`;
+  $("#heat").innerHTML = Array.from({ length: 24 }, (_, hr) => {
+    const v = (st.hours || {})[String(hr).padStart(2, "0")] || [0, 0, 0], m = v[0] + v[1], p = m ? v[0] / m * 100 : null;
+    const col = p == null ? null : p >= be ? C.teal : p >= be - 4 ? C.lav2 : C.pink;
+    const a = p == null ? 0 : Math.min(1, 0.25 + m / 40);
+    const bg = col ? col + Math.round(a * 255).toString(16).padStart(2, "0") : "#ffffff08";
+    const fg = col && a > 0.55 ? C.ink : "#c4ccd4";
+    return `<div style="background:${bg};color:${fg}" title="${hr}:00–${hr}:59 น. · ชนะ ${v[0]} แพ้ ${v[1]} เสมอ ${v[2]}">${String(hr).padStart(2, "0")}:00<b>${p == null ? "–" : p.toFixed(0) + "%"}</b><small>${m} ไม้</small></div>`;
+  }).join("");
+
+  // แยกเทคนิค
+  const techs = (st.techs || []).map(t => t.name);
+  Object.keys(st.stats || {}).forEach(t => techs.includes(t) || techs.push(t));
+  $("#sgrid").innerHTML = techs.filter(t => range !== "mine" || techOn(t)).map(t => {
+    const s = st.stats?.[t] || {}, w = s["ชนะ"] || 0, l2 = s["แพ้"] || 0, m = w + l2, p = m ? w / m * 100 : 0, [a, b2] = wilson(w, m);
+    const bt = (st.techs || []).find(x => x.name === t);
+    return `<div class="card sc">${ringSvg(p, m && p >= be ? C.teal : C.pink, 110, 8, m ? p.toFixed(1) + "%" : "–", `${m} ไม้`)}
+      <div class="nm">${esc(t)}</div>
+      <div class="cibar">${m ? `<i style="left:${a * 100}%;width:${(b2 - a) * 100}%"></i>` : ""}<b style="left:${be}%"></b></div>
+      <div class="ci">${m ? `ช่วงจริง ${(a * 100).toFixed(0)}–${(b2 * 100).toFixed(0)}%` : "ยังไม่มีผล"}${bt ? ` · ย้อนหลัง ${bt.wr}%` : ""}</div></div>`;
+  }).join("");
+
+  // ประวัติ
+  $("#histCount").textContent = st.history_total ? `ทั้งหมด ${st.history_total} ไม้ · แสดง 200 ล่าสุด` : "";
+  const hist = (st.history || []).filter(r => (!q || r.pair.includes(q)) && (range !== "mine" || techOn(r.tech)));
+  $("#histBody").innerHTML = hist.map((r, i) => {
+    const cls = { "ชนะ": "p-win", "แพ้": "p-loss" }[r.result] || "p-draw";
+    const e = +r.entry, c = +r.close;
+    return `<tr data-h="${i}"><td class="muted num">${esc(r.thai_time.slice(5))}</td><td>${curBadge(r.pair)}</td><td><span class="dirp ${esc(r.dir)}">${esc(r.dir)}</span></td>
+      <td class="hide-m">${esc(r.tech)}</td><td class="hide-m num muted">${e ? `${e.toFixed(digits(e))} → <span class="${c > e ? "up" : c < e ? "down" : ""}">${c.toFixed(digits(c))}</span>` : "–"}</td>
+      <td><span class="pill ${cls}">${esc(r.result)}</span></td></tr>`;
+  }).join("") || `<tr><td colspan="6" class="empty">ยังไม่มีประวัติ — ผลจะถูกจดเมื่อแท่งที่เทรดปิด</td></tr>`;
+  $$("#histBody tr[data-h]").forEach(tr => tr.onclick = () => openSignal(hist[+tr.dataset.h]));
+}
+
+// ---------- หน้าต่างรายละเอียดสัญญาณ ----------
+let modalSig = null;
+function openSignal(s) {
+  if (!s) return;
+  modalSig = s; $("#modal").classList.add("on"); drawModal();
+}
+function drawModal() {
+  const s = modalSig; if (!s) return;
+  const live = (st.signals || []).find(x => x.pair === s.pair && x.thai_time === s.thai_time && x.tech === s.tech);
+  const sig = { ...s, ...(live || {}) }, ph = phase(sig);
+  if (!sig.wr) sig.wr = (st.techs || []).find(t => t.name === sig.tech)?.wr;
+  const entry = sig.entry != null && sig.entry !== "" ? +sig.entry : null, close = sig.close != null && sig.close !== "" ? +sig.close : null;
+  const P = PTS(), pnl = sig.result === "ชนะ" ? P.W : sig.result === "แพ้" ? P.L : 0;
+  const bars = (st.pairs?.[sig.pair]?.candles || []).map(b => ({ ...b }));
+  const idx = bars.findIndex(b => b.t === sig.thai_time.slice(11)) ;
+  const day = sig.thai_time.slice(0, 10) === today();
+  const window_ = idx >= 0 && day ? bars.slice(Math.max(0, idx - 24), idx + 6) : [];
+  $("#mBody").innerHTML = `<div class="mhead">${curBadge(sig.pair)}<span class="dirp ${esc(sig.dir)}" style="font-size:14px">${sig.dir === "CALL" ? "▲" : "▼"} ${esc(sig.dir)}</span>
+      <span class="pill ${ph.cls}">${esc(ph.label)}</span>${sig.setup_a === true || sig.setup_a === "True" ? '<span class="tag t-star">★ แบบ A</span>' : ""}</div>
+    <div class="mgrid2">
+      <div><span>เวลาเข้า</span><b>${esc(sig.thai_time.slice(11))} น.</b></div>
+      <div><span>หมดอายุ</span><b>${new Date(thaiMs(sig.thai_time) + 300e3).toISOString().slice(11, 16)} น.</b></div>
+      <div><span>ราคาเข้า</span><b>${entry != null ? entry.toFixed(digits(entry)) : "–"}</b></div>
+      <div><span>ราคาปิด</span><b class="${close != null && entry != null ? (close > entry ? "up" : close < entry ? "down" : "") : ""}">${close != null ? close.toFixed(digits(close)) : "–"}</b></div>
+      <div style="grid-column:span 2"><span>เทคนิค</span><b>${esc(sig.tech)}</b></div>
+      <div><span>ย้อนหลัง</span><b>${sig.wr ? esc(sig.wr) + "%" : "–"}</b></div>
+      <div><span>ผลจำลอง</span><b class="${pnl > 0 ? "up" : pnl < 0 ? "down" : ""}">${sig.result ? money(pnl) : ph.txt}</b></div>
+    </div>
+    ${window_.length > 3 ? `<svg id="mSvg"></svg><div class="muted" style="margin-top:6px">แถบสี = แท่งที่เข้าเทรด · เส้นประ = ราคาเข้า</div>` :
+      `<div class="muted" style="padding:12px 0">กราฟของสัญญาณนี้เก่าเกิน 60 แท่งล่าสุดแล้ว (ดูได้เฉพาะตัวเลข)</div>`}`;
+  if (window_.length > 3) {
+    const last = window_.at(-1), pd = st.pairs[sig.pair];
+    if (idx + 6 >= bars.length && pd.price != null) { last.c = pd.price; last.h = Math.max(last.h, pd.price); last.l = Math.min(last.l, pd.price); }
+    const levels = entry != null ? [{ v: entry, c: C.lav, dark: true, label: "ราคาเข้า" }] : [];
+    candleChart($("#mSvg"), window_, { H: 220, id: "m", marks: [sig], focus: sig, levels });
+  }
+}
+$("#mClose").onclick = () => { $("#modal").classList.remove("on"); modalSig = null; };
+$("#modal").onclick = e => { if (e.target.id === "modal") $("#mClose").onclick(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("#mClose").onclick(); });
+
+// ---------- ป๊อปอัปสัญญาณใหม่ ----------
+function announce(s, test = false) {
+  if (S.sound) beep();
+  if (S.notify) try { new Notification(`${s.pair} ${s.dir} เข้าตอน ${s.thai_time.slice(11)} น.`, { body: `${s.tech} · ย้อนหลัง ${s.wr}%`, tag: s.id }); } catch {}
+  if (!S.toast) return;
+  const el = document.createElement("div");
+  el.className = "toast"; el.dataset.id = s.id; el._sig = s;
+  el.innerHTML = `<button class="x">×</button>
+    <div class="row1"><div class="bigdir ${esc(s.dir)}">${s.dir === "CALL" ? "▲" : "▼"} ${esc(s.dir)}</div>
+      <div><div class="pp">${esc(s.pair.slice(0, 3))}/${esc(s.pair.slice(3))}</div><div class="tt">${esc(s.tech)}${s.setup_a ? " · ★ แบบ A" : ""}</div></div></div>
+    <div class="cd"><span class="lbl"></span><b class="tm"></b></div><div class="tt">เข้าตอน ${esc(s.thai_time.slice(11))} น. · หมดอายุ 5 นาที · ย้อนหลัง ${esc(s.wr)}%</div><i class="tb"></i>`;
+  el.querySelector(".x").onclick = e => { e.stopPropagation(); closeToast(el); };
+  if (!test) el.onclick = () => openSignal(s);
+  $("#toasts").prepend(el);
+  while ($("#toasts").children.length > 4) $("#toasts").lastChild.remove();
+  updateToasts();
+}
+function closeToast(el) { el.classList.add("out"); setTimeout(() => el.remove(), 300); }
+function updateToasts() {
+  $$(".toast").forEach(el => {
+    const live = (st?.signals || []).find(x => x.id === el.dataset.id);
+    const s = live || el._sig, ph = phase(s);
+    el.querySelector(".lbl").textContent = s.result ? "ผล" : ph.label === "เตรียมเข้า" ? "เข้าในอีก" : ph.label === "กำลังเทรด" ? "หมดอายุใน" : "รอผล";
+    el.querySelector(".tm").textContent = s.result || (ph.left ? mmss(ph.left) : "…");
+    el.querySelector(".tm").style.color = s.result === "ชนะ" ? "#11b88f" : s.result === "แพ้" ? C.pink : "";
+    el.querySelector(".tb").style.width = (ph.label === "เตรียมเข้า" ? 100 - ph.left / 3000 : ph.pct) + "%";
+    if (s.result && !el._done) { el._done = true; setTimeout(() => closeToast(el), 8000); }
+    if (!s.result && thaiNow() > thaiMs(s.thai_time) + 600e3) closeToast(el);
+  });
+}
+
+// ---------- วาดทั้งหมด ----------
+function render(fresh = new Set()) {
+  $("#error").style.display = st.error ? "block" : "none";
+  $("#error").textContent = st.error ? "⚠ " + st.error : "";
+  setStatus(!st.error && !!st.heartbeat, st.error ? "มีปัญหา" : st.heartbeat ? `ออนไลน์ · ${st.heartbeat}` : "กำลังเชื่อม MT5…");
+  if (view === "home") { renderKpis(); renderLatest(); renderArea(); renderDonut(); renderRadar(); renderTimeline(); }
+  if (view === "signals") renderSignals(fresh);
+  if (view === "market") renderMarket();
+  if (view === "stats") renderStats();
+  if (view === "settings" && !document.activeElement?.matches("input")) paintSettings();
+  if (modalSig) drawModal();
+}
+
+window.addEventListener("focus", () => { document.title = "สัญญาณ M5"; });
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => st && render(), 150); });
+
+async function poll() {
+  try {
+    const r = await fetch("/state", { cache: "no-store" });
+    st = await r.json(); lastOk = Date.now();
+    st.pairs_agg = st.pair_results || {};  // {คู่เงิน: [ชนะ, แพ้, เสมอ]}
+    const fresh = new Set();
+    (st.signals || []).forEach(s => {
+      if (seen.has(s.id)) return;
+      seen.add(s.id);
+      if (first) return;
+      fresh.add(s.id);
+      if (alertable(s)) announce(s);
+    });
+    first = false;
+    if (fresh.size) { latestIdx = 0; document.title = `(${fresh.size}) สัญญาณใหม่ · สัญญาณ M5`; if (view !== "signals") { unread += fresh.size; paintUnread(); } }
+    render(fresh);
+  } catch (e) { console.error(e); }
+  setTimeout(poll, 2000);
+}
+paintSettings(); tick(); poll();
+const v0 = location.hash.slice(1); if (TITLES[v0]) show(v0);
+</script>
+</body>
+</html>

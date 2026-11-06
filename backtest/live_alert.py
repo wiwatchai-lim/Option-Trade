@@ -32,6 +32,11 @@ THAI = timezone(timedelta(hours=7))
 
 BASE = [t for t in TECHS if t[4]]
 
+# สถานะล่าสุดสำหรับหน้าเว็บ (dashboard.py อ่านค่านี้ — ห้ามเรียก MT5 จากเธรดอื่น)
+STATE = {"started": None, "techs": [], "pairs": {}, "signals": [], "error": None, "heartbeat": None}
+STATE_LOCK = threading.Lock()
+CANDLES = 60
+
 
 def server_offset_hours():
     tick = mt5.symbol_info_tick("EURUSD")
@@ -73,14 +78,24 @@ def fetch(pair):
     return prepare(df)
 
 
-def main():
-    wanted = set(sys.argv[1:]) or set(BACKTEST_WR)
+def candles(df: pd.DataFrame, offset: int, upto: int) -> list:
+    part = df.iloc[max(0, upto - CANDLES + 1): upto + 1]
+    return [{"t": f"{to_thai(r.time, offset):%H:%M}", "o": r.open, "h": r.high, "l": r.low, "c": r.close,
+             "sma5": None if pd.isna(r.sma5) else r.sma5} for r in part.itertuples()]
+
+
+def main(wanted=None, web=False):
+    """web=True: ไม่เด้งหน้าต่าง popup (หน้าเว็บแจ้งเตือนเอง)"""
+    wanted = set(wanted or sys.argv[1:]) or set(BACKTEST_WR)
     techs = [t for t in BASE if t[0][0] in wanted]
     if not mt5.initialize():
         sys.exit(f"เชื่อม MT5 ไม่ได้: {mt5.last_error()} (เปิดโปรแกรม MetaTrader 5 ก่อน)")
     for p in PAIRS:
         mt5.symbol_select(p, True)
     offset = server_offset_hours()
+    with STATE_LOCK:
+        STATE["started"] = f"{datetime.now(THAI):%Y-%m-%d %H:%M:%S}"
+        STATE["techs"] = [{"name": t[0], "dir": "PUT" if t[1] else "CALL", "wr": BACKTEST_WR[t[0][0]]} for t in techs]
     print(f"เริ่มเฝ้ากราฟ 5 นาที {len(PAIRS)} คู่เงิน | เทคนิค: {', '.join(t[0] for t in techs)}")
     print("Win rate ย้อนหลังของทุกเทคนิคอยู่ที่ 47-50% (ต่ำกว่าจุดคุ้มทุน 52-53%) ใช้เพื่อทดลอง/บัญชี Demo")
     print("กด Ctrl+C เพื่อหยุด\n")
@@ -93,6 +108,8 @@ def main():
                 head = mt5.copy_rates_from_pos(pair, mt5.TIMEFRAME_M5, 0, 2)  # เช็คเร็วว่ามีแท่งใหม่ปิดไหม
                 if head is None or len(head) < 2:
                     continue
+                with STATE_LOCK:
+                    STATE["pairs"].setdefault(pair, {})["price"] = float(head[1]["close"])
                 if last_bar.get(pair) == pd.Timestamp(head[0]["time"], unit="s"):
                     continue
                 df = fetch(pair)
@@ -104,6 +121,9 @@ def main():
                     continue
                 first_run = pair not in last_bar
                 last_bar[pair] = bar_t
+                with STATE_LOCK:
+                    STATE["pairs"][pair].update(candles=candles(df, offset, len(df) - 1),
+                                                last_closed=f"{to_thai(bar_t, offset):%H:%M}")
 
                 # อัปเดตผลของสัญญาณที่แท่งเทรดเพิ่งปิด
                 for s in [s for s in pending if s["pair"] == pair and s["trade_bar"] == bar_t]:
@@ -113,6 +133,8 @@ def main():
                     print(f"   ผล {s['pair']} {s['tech']} ({s['thai_time']}): {res}")
                     log_row({**{k: s[k] for k in ("thai_time", "pair", "tech", "dir", "setup_a", "danger_time")},
                              "entry": o, "close": c, "result": res})
+                    with STATE_LOCK:
+                        s["view"].update(result=res, entry=float(o), close=float(c))
                     pending.remove(s)
                 if first_run:
                     continue
@@ -130,17 +152,29 @@ def main():
                            f"{'  (ตรงแบบ A)' if star else ''}"
                            f"{chr(10) + '⚠ ช่วง 04-07 น. ผลแย่ที่สุด ไม่แนะนำให้เข้า' if danger else ''}")
                     print(f"[{datetime.now(THAI):%H:%M:%S}] " + msg.replace("\n", " | "))
-                    winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-                    popup(msg)
+                    if not web:
+                        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+                        popup(msg)
+                    view = {"id": f"{pair}-{bar_t:%Y%m%d%H%M}-{name[0]}", "pair": pair, "tech": name, "dir": d,
+                            "setup_a": star, "danger_time": danger, "thai_time": f"{thai:%Y-%m-%d %H:%M}",
+                            "wr": 54.3 if star else BACKTEST_WR[name[0]], "result": None}
+                    with STATE_LOCK:
+                        STATE["signals"].append(view)
+                        del STATE["signals"][:-200]
                     pending.append({"pair": pair, "tech": name, "dir": d, "setup_a": star, "danger_time": danger,
-                                    "thai_time": f"{thai:%Y-%m-%d %H:%M}",
+                                    "thai_time": f"{thai:%Y-%m-%d %H:%M}", "view": view,
                                     "trade_bar": bar_t + timedelta(minutes=5)})
+            with STATE_LOCK:
+                STATE["error"] = None
+                STATE["heartbeat"] = f"{datetime.now(THAI):%H:%M:%S}"
             time.sleep(POLL_SEC)
         except KeyboardInterrupt:
             print("\nหยุดแล้ว")
             break
         except Exception as e:  # MT5 หลุดชั่วคราว ฯลฯ
             print(f"ผิดพลาด: {e} — ลองใหม่ใน 10 วินาที")
+            with STATE_LOCK:
+                STATE["error"] = str(e)
             time.sleep(10)
             mt5.initialize()
     mt5.shutdown()
